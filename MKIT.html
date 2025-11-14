@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>MyBlock — Mini Scratch</title>
+
+    <!-- Blockly einbinden -->
+    <script src="https://unpkg.com/blockly/blockly.min.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            background: #f0f8ff; /* sehr hellblau */
+            font-family: Arial;
+        }
+        #blocklyArea {
+            flex: 1;
+            position: relative;
+        }
+        #blocklyDiv {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        #runButton {
+            width: 200px;
+            background: #4da9ff;
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        #runButton:hover {
+            background: #1d8fff;
+        }
+        #output {
+            background: white;
+            width: 300px;
+            padding: 10px;
+            border-left: 2px solid #89c3ff;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+
+<div id="blocklyArea">
+    <div id="blocklyDiv"></div>
+</div>
+
+<div id="output">
+    <button id="runButton">▶ Run Script</button>
+    <h3>Ausgabe:</h3>
+    <pre id="console"></pre>
+</div>
+
+<script>
+    // Blockly konfigurieren
+    const toolbox = {
+      "kind": "flyoutToolbox",
+      "contents": [
+        {
+            "kind": "block",
+            "type": "controls_repeat_ext"
+        },
+        {
+            "kind": "block",
+            "type": "controls_if"
+        },
+        {
+            "kind": "block",
+            "type": "math_number"
+        },
+        {
+            "kind": "block",
+            "type": "text"
+        },
+        {
+            "kind": "block",
+            "type": "text_print"
+        }
+      ]
+    };
+
+    const blocklyDiv = document.getElementById('blocklyDiv');
+    const blocklyArea = document.getElementById('blocklyArea');
+
+    const workspace = Blockly.inject(blocklyDiv, {
+        toolbox: toolbox,
+        theme: Blockly.Themes.Zelos,  // modern white/blue theme
+        move: { scrollbars: true }
+    });
+
+    // Blockly-Workspace automatisch an Fenster anpassen
+    function onResize() {
+        blocklyDiv.style.width = blocklyArea.offsetWidth + 'px';
+        blocklyDiv.style.height = blocklyArea.offsetHeight + 'px';
+        Blockly.svgResize(workspace);
+    }
+    window.addEventListener('resize', onResize, false);
+    onResize();
+
+    // Run Script
+    document.getElementById("runButton").onclick = () => {
+        const consoleBox = document.getElementById("console");
+        consoleBox.textContent = "";
+
+        // Blockly generiert JavaScript
+        const code = Blockly.JavaScript.workspaceToCode(workspace);
+
+        try {
+            const print = msg => consoleBox.textContent += msg + "\n";
+            const func = new Function("print", code);
+            func(print);
+        } catch (e) {
+            consoleBox.textContent = "Fehler: " + e;
+        }
+    };
+</script>
+</body>
+</html>
